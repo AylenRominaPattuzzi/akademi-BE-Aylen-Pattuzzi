@@ -14,6 +14,7 @@ exports.createDoctor = async (req, res) => {
   }
 };
 
+//TODO: Probar el filtro
 exports.listDoctors = async (req, res) => {
   try {
     const filter = {};

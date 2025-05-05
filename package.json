@@ -1,7 +1,6 @@
 {
-    "name": "akademi-doctores",
+    "name": "akademi",
     "version": "1.0.0",
-    "description": "ABM básico de gestión de doctores",
     "main": "server.js",
     "scripts": {
         "start": "node server.js"
