@@ -1,49 +1,62 @@
 const Doctor = require('../models/Doctor');
+const HttpError = require('../utils/http-error');
 
-exports.createDoctor = async (req, res) => {
+
+const createDoctor = async (req, res, next) => {
   try {
     const existingDoctor = await Doctor.findOne({ email: req.body.email });
     if (existingDoctor) {
-      return res.status(400).json({ error: 'El correo electrónico ya está registrado'  });
+      return next(new HttpError('El correo electrónico ya está registrado', 400));
     }
     const newDoctor = new Doctor(req.body);
     const savedDoctor = await newDoctor.save();
     res.status(201).json(savedDoctor);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    next(new HttpError(error.message, 400));
   }
 };
 
-//TODO: Probar el filtro
-exports.listDoctors = async (req, res) => {
+const listDoctors = async (req, res, next) => {
   try {
     const filter = {};
+
     if (req.query.specialty) {
       filter.specialty = req.query.specialty;
     }
+
     const doctors = await Doctor.find(filter);
     res.json(doctors);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    next(new HttpError(error.message, 500));
   }
 };
 
-exports.getDoctorById = async (req, res) => {
+
+const getDoctorById = async (req, res, next) => {
   try {
     const doctor = await Doctor.findById(req.params.id);
-    if (!doctor) return res.status(404).json({ error: 'Doctor no encontrado' });
+    if (!doctor) {
+      return next(new HttpError('Doctor no encontrado', 404));
+    }
     res.json(doctor);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    next(new HttpError(error.message, 500));
   }
 };
 
-exports.updateDoctor = async (req, res) => {
+const updateDoctor = async (req, res, next) => {
   try {
     const updatedDoctor = await Doctor.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (!updatedDoctor) return res.status(404).json({ error: 'Doctor no encontrado' });
+    if (!updatedDoctor) {
+      return next(new HttpError('Doctor no encontrado', 404));
+    }
     res.json(updatedDoctor);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    next(new HttpError(error.message, 500));
   }
 };
+
+exports.createDoctor = createDoctor;
+exports.listDoctors = listDoctors;
+exports.getDoctorById = getDoctorById;
+exports.updateDoctor = updateDoctor;
