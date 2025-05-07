@@ -16,6 +16,8 @@ const createDoctor = async (req, res, next) => {
   }
 };
 
+
+//TODO: Paginacion
 const listDoctors = async (req, res, next) => {
   try {
     const filter = {};

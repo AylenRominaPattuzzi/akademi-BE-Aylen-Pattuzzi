@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
+//Agregar hora
+
 const appointmentSchema = new Schema({
     patient: { type: mongoose.Types.ObjectId, ref: 'Patient', required: true },
     doctor: { type: mongoose.Types.ObjectId, ref: 'Doctor', required: true },

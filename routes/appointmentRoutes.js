@@ -16,15 +16,24 @@ router.post(
     check('date')
       .notEmpty()
       .withMessage('La fecha es obligatoria')
-      .isISO8601()
-      .withMessage('La fecha debe estar en formato ISO (YYYY-MM-DDTHH:mm:ss)')
   ],
   appointmentController.createAppointment
 );
+
 router.get('/', appointmentController.listAppointments);
+
 router.get('/:id', appointmentController.getAppointmentById);
 
-//TODO: agregar el put
-
+router.put(
+  '/:id/status',
+  [
+    check('status')
+      .notEmpty()
+      .withMessage('El estado es obligatorio')
+      .isIn(['confirmado', 'cancelado'])
+      .withMessage('El estado debe ser "confirmado" o "cancelado"')
+  ],
+  appointmentController.updateAppointmentStatus
+);
 
 module.exports = router;

@@ -15,6 +15,7 @@ const createPatient = async (req, res, next) => {
   }
 };
 
+//TODO: Paginacion
 const listPatients = async (req, res, next) => {
   try {
     const filter = {};
@@ -48,6 +49,8 @@ const getPatientById = async (req, res, next) => {
   }
 };
 
+
+//REVISAR!!
 const updatePatient = async (req, res, next) => {
   try {
     const updatedPatient = await Patient.findByIdAndUpdate(req.params.id, req.body, { new: true });
@@ -60,6 +63,8 @@ const updatePatient = async (req, res, next) => {
   }
 };
 
+
+//REVISAR!!
 const deletePatient = async (req, res, next) => {
   try {
     const deleted = await Patient.findByIdAndDelete(req.params.id);
