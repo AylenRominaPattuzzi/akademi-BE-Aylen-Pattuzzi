@@ -1,12 +1,29 @@
 const Appointment = require('../models/Appointment');
+const Doctor = require('../models/Doctor');
+const Patient = require('../models/Patient');
 const HttpError = require('../utils/http-error');
 
 const createAppointment = async (req, res, next) => {
   const { patient, doctor, date, reason } = req.body;
 
   try {
-    const overlappingAppointment = await Appointment.findOne({ doctor, date: new Date(date), });
+    const appointmentDate = new Date(date);
 
+    if (appointmentDate <= new Date()) {
+      return next(new HttpError('La fecha del turno debe ser futura', 400));
+    }
+
+    const doctorExists = await Doctor.findById(doctor);
+    if (!doctorExists || !doctorExists.active) {
+      return next(new HttpError('El doctor no existe o está inhabilitado', 400));
+    }
+
+    const patientExists = await Patient.findById(patient);
+    if (!patientExists) {
+      return next(new HttpError('El paciente no existe', 400));
+    }
+
+    const overlappingAppointment = await Appointment.findOne({ doctor, date: appointmentDate });
     if (overlappingAppointment) {
       return next(new HttpError('El doctor no está disponible en esa fecha y hora', 400));
     }
@@ -14,8 +31,8 @@ const createAppointment = async (req, res, next) => {
     const newAppointment = new Appointment({
       patient,
       doctor,
-      date: new Date(date),
-      reason,
+      date: appointmentDate,
+      reason
     });
 
     const savedAppointment = await newAppointment.save();
@@ -25,24 +42,33 @@ const createAppointment = async (req, res, next) => {
   }
 };
 
-
 const listAppointments = async (req, res, next) => {
-  const { patient, doctor } = req.query;
+  const { patient, doctor, page = 1, limit = 10 } = req.query;
 
   if (!patient || !doctor) {
     return next(new HttpError('Filtros "patient" y "doctor" son obligatorios', 400));
   }
 
   try {
-    const appointments = await Appointment.find({ patient, doctor })
+    const filter = { patient, doctor };
+
+    const total = await Appointment.countDocuments(filter);
+    const appointments = await Appointment.find(filter)
+      .skip((page - 1) * limit)
+      .limit(Number(limit))
       .populate('patient')
       .populate('doctor');
-    res.json(appointments);
+
+    res.json({
+      total,
+      page: Number(page),
+      totalPages: Math.ceil(total / limit),
+      data: appointments
+    });
   } catch (error) {
     next(new HttpError(error.message, 500));
   }
 };
-
 
 const getAppointmentById = async (req, res, next) => {
   try {
@@ -60,15 +86,14 @@ const getAppointmentById = async (req, res, next) => {
   }
 };
 
-
 const updateAppointmentStatus = async (req, res, next) => {
   const { status } = req.body;
 
-  if (!['confirmado', 'cancelado'].includes(status)) {
-    return next(new HttpError('Estado inválido', 400));
-  }
-
   try {
+    if (!['confirmado', 'cancelado'].includes(status)) {
+      return next(new HttpError('Estado inválido', 400));
+    }
+
     const updatedAppointment = await Appointment.findByIdAndUpdate(
       req.params.id,
       { status },

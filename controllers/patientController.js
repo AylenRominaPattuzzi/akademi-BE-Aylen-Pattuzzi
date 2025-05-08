@@ -1,11 +1,21 @@
+const { validationResult } = require('express-validator');
 const Patient = require('../models/Patient');
 const HttpError = require('../utils/http-error');
 
 const createPatient = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return next(new HttpError(errors.array()[0].msg, 422));
+  }
   try {
-    const existingPatient = await Patient.findOne({ email: req.body.email });
+    const existingPatient = await Patient.findOne({
+      $or: [
+        { email: req.body.email },
+        { dni: req.body.dni }
+      ]
+    });
     if (existingPatient) {
-      return next(new HttpError('El correo electrónico ya está registrado', 400));
+      return next(new HttpError('Ya existe un paciente con ese correo electrónico o DNI', 400));
     }
     const newPatient = new Patient(req.body);
     const savePatient = await newPatient.save();
@@ -15,11 +25,9 @@ const createPatient = async (req, res, next) => {
   }
 };
 
-//TODO: Paginacion
 const listPatients = async (req, res, next) => {
   try {
     const filter = {};
-
     if (req.query.name) {
       filter.firstName = new RegExp(req.query.name, 'i');
     }
@@ -30,8 +38,14 @@ const listPatients = async (req, res, next) => {
       filter.medicalCoverage = req.query.medicalCoverage;
     }
 
-    const patients = await Patient.find(filter);
-    res.json(patients);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const total = await Patient.countDocuments(filter);
+    const patients = await Patient.find(filter).skip(skip).limit(limit);
+
+    res.json({ total, page, limit, patients });
   } catch (error) {
     next(new HttpError(error.message, 500));
   }
@@ -49,9 +63,11 @@ const getPatientById = async (req, res, next) => {
   }
 };
 
-
-//REVISAR!!
 const updatePatient = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return next(new HttpError(errors.array()[0].msg, 422));
+  }
   try {
     const updatedPatient = await Patient.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!updatedPatient) {
@@ -63,8 +79,6 @@ const updatePatient = async (req, res, next) => {
   }
 };
 
-
-//REVISAR!!
 const deletePatient = async (req, res, next) => {
   try {
     const deleted = await Patient.findByIdAndDelete(req.params.id);
@@ -78,7 +92,7 @@ const deletePatient = async (req, res, next) => {
 };
 
 exports.createPatient = createPatient;
-exports.listPatients =listPatients;
+exports.listPatients = listPatients;
 exports.getPatientById = getPatientById;
 exports.updatePatient = updatePatient;
 exports.deletePatient = deletePatient;

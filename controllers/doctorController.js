@@ -1,4 +1,5 @@
 const Doctor = require('../models/Doctor');
+const Appointment = require('../models/Appointment'); // Suponiendo que existe un modelo de Turnos
 const HttpError = require('../utils/http-error');
 
 
@@ -17,22 +18,25 @@ const createDoctor = async (req, res, next) => {
 };
 
 
-//TODO: Paginacion
 const listDoctors = async (req, res, next) => {
   try {
     const filter = {};
 
-    if (req.query.specialty) {
-      filter.specialty = req.query.specialty;
+    if (!req.query.specialty) {
+      return next(new HttpError('La especialidad es obligatoria', 400));
     }
+    filter.specialty = req.query.specialty;
 
-    const doctors = await Doctor.find(filter);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const doctors = await Doctor.find(filter).skip(skip).limit(limit);
     res.json(doctors);
   } catch (error) {
     next(new HttpError(error.message, 500));
   }
 };
-
 
 const getDoctorById = async (req, res, next) => {
   try {
@@ -48,6 +52,14 @@ const getDoctorById = async (req, res, next) => {
 
 const updateDoctor = async (req, res, next) => {
   try {
+ 
+    if (req.body.active === false) {
+      const doctorHasAppointments = await Appointment.exists({ doctor: req.params.id });
+      if (doctorHasAppointments) {
+        return next(new HttpError('No se puede dar de baja a un doctor con turnos asignados', 400));
+      }
+    }
+
     const updatedDoctor = await Doctor.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!updatedDoctor) {
       return next(new HttpError('Doctor no encontrado', 404));
