@@ -586,6 +586,34 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "updateUser",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n     \"name\": \"admin\",\n            \"email\": \"aylenrominapattuzzi@gmail.com\",\n            \"role\": \"admin\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/user/681e0b0e8e907736d63fa266",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"681e0b0e8e907736d63fa266"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		}
