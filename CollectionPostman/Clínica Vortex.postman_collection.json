@@ -1,0 +1,625 @@
+{
+	"info": {
+		"_postman_id": "f3109685-3576-4ec1-99db-91819130e0eb",
+		"name": "Clínica Vortex",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "20378233"
+	},
+	"item": [
+		{
+			"name": "Doctor",
+			"item": [
+				{
+					"name": "createDoctor",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"firstName\": \"prueba\",\n  \"lastName\": \"sdadasadas\",\n  \"specialty\": \"Dermatologa\",\n  \"email\": \"dasdadad@gmail.com\",\n  \"phone\": \"3519876543\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/doctors",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"doctors"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "listDoctors",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/doctors",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"doctors"
+							],
+							"query": [
+								{
+									"key": "specialty",
+									"value": "Dermatologa",
+									"disabled": true
+								},
+								{
+									"key": "page",
+									"value": "2",
+									"disabled": true
+								},
+								{
+									"key": "limit",
+									"value": "5",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getDoctorById",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/doctors/681e2af1483e189e44b8f83f",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"doctors",
+								"681e2af1483e189e44b8f83f"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateDoctor",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"firstName\": \"prueba2\",\n  \"lastName\": \"Fernández Updated\",\n  \"specialty\": \"Pediatria\",\n  \"phone\": \"3519876543\",\n  \"email\": \"dsadada@gmail.com\",\n  \"active\": false\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/doctors/681e2af1483e189e44b8f83f",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"doctors",
+								"681e2af1483e189e44b8f83f"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Patient",
+			"item": [
+				{
+					"name": "createPatient",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"firstName\": \"prueba\",\n  \"lastName\": \"prueba\",\n  \"dni\": \"2343242\",\n  \"email\": \"ewqeqeq@example.com\",\n  \"phone\": \"3535692591\",\n  \"medicalCoverage\": \"sancor\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/patients",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"patients"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getPatientById",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/patients/681e2993af7a0b498c21130b",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"patients",
+								"681e2993af7a0b498c21130b"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "listPatients",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/patients/?medicalCoverage=OSDE&firstName=Ana&dni=12345678&page=1&limit=3",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"patients",
+								""
+							],
+							"query": [
+								{
+									"key": "medicalCoverage",
+									"value": "OSDE"
+								},
+								{
+									"key": "firstName",
+									"value": "Ana"
+								},
+								{
+									"key": "dni",
+									"value": "12345678"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "3"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updatePatient",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"firstName\": \"Ana\",\n    \"lastName\": \"Gómez\",\n    \"dni\": \"12345678\",\n    \"email\": \"aylenrominapattuzzi@gmail.com\",\n    \"phone\": \"3511111111\",\n    \"medicalCoverage\": \"OSDE\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/patients/681a4e2a3a1bf42c3586df6a",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"patients",
+								"681a4e2a3a1bf42c3586df6a"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deletePatient",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/patients/681e2993af7a0b498c21130b",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"patients",
+								"681e2993af7a0b498c21130b"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Appointment",
+			"item": [
+				{
+					"name": "createAppointment",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"patient\": \"681a4e2a3a1bf42c3586df6a\",\n  \"doctor\": \"6818f93bab78b16ba21cb420\",\n  \"date\": \"2025-10-10T13:00:00.000Z\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/appointment",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"appointment"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "listAppointments",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/appointment?page=1&limit=5",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"appointment"
+							],
+							"query": [
+								{
+									"key": "patient",
+									"value": "681a4e2a3a1bf42c3586df6a",
+									"disabled": true
+								},
+								{
+									"key": "doctor",
+									"value": "6818f93bab78b16ba21cb420",
+									"disabled": true
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "5"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAppointmentById",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/appointment/681e36a766833f5db67ce1d7",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"appointment",
+								"681e36a766833f5db67ce1d7"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateAppointmentStatus",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"confirmado\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/appointment/681e36a766833f5db67ce1d7/status/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"appointment",
+								"681e36a766833f5db67ce1d7",
+								"status",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "User",
+			"item": [
+				{
+					"name": "registerUser",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4MWNjZDc4NzlkODNhMTM1Yzc1Mzg0YyIsImlhdCI6MTc0NjczNjgzNCwiZXhwIjoxNzQ2NzQwNDM0fQ.a1XN56aIXM_R7JyTmzt1XkYrbTXnLmn3um6tTQ89hfk",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"prueba3\",\n  \"email\": \"aylenpattuzzii@gmail.com\",\n  \"password\": \"prueba123\",\n  \"role\": \"recepcion\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/user/register",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "loginUser",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\":  \"aylenrominapattuzzi@gmail.com\",\n  \"password\": \"123456789\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/user/login",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "listUsers",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/user/?role=admin&page=1&limit=4",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"user",
+								""
+							],
+							"query": [
+								{
+									"key": "role",
+									"value": "admin"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "4"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteUser",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/user/681e0b0e8e907736d63fa266",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"681e0b0e8e907736d63fa266"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "recoverPassword",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"aylenrominapattuzzi@gmail.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/user/recover",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"recover"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "resetPassword",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"password\": \"123456789\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/user/reset/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4MWUwYjBlOGU5MDc3MzZkNjNmYTI2NiIsImVtYWlsIjoiYXlsZW5yb21pbmFwYXR0dXp6aUBnbWFpbC5jb20iLCJpYXQiOjE3NDY4MDYyNjgsImV4cCI6MTc0NjgzMTQ2OH0.1KoyU3AYEBlzGNwlFqWcC8h9z2_rIQCDqFVA30noR0I",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"user",
+								"reset",
+								"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4MWUwYjBlOGU5MDc3MzZkNjNmYTI2NiIsImVtYWlsIjoiYXlsZW5yb21pbmFwYXR0dXp6aUBnbWFpbC5jb20iLCJpYXQiOjE3NDY4MDYyNjgsImV4cCI6MTc0NjgzMTQ2OH0.1KoyU3AYEBlzGNwlFqWcC8h9z2_rIQCDqFVA30noR0I"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getUserById",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/user/681e0b0e8e907736d63fa266",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"681e0b0e8e907736d63fa266"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{authToken}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
