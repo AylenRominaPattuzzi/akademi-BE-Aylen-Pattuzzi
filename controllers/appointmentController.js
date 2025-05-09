@@ -5,6 +5,8 @@ const HttpError = require('../utils/http-error');
 const { APPOINTMENT_STATUS } = require('../models/Appointment');
 const { paginatedResponse } = require('../utils/paginate');
 const { default: mongoose } = require('mongoose');
+const sendEmail = require('../utils/sendEmail');
+const { appointmentReminderEmail } = require('../utils/emails/appointmentReminderEmail');
 
 const createAppointment = async (req, res, next) => {
   const { patient, doctor, date, reason } = req.body;
@@ -29,6 +31,22 @@ const createAppointment = async (req, res, next) => {
     const overlappingAppointment = await Appointment.findOne({ doctor, date: appointmentDate, status: { $ne: 'cancelado' } });
     if (overlappingAppointment) {
       return next(new HttpError('El doctor no está disponible en esa fecha y hora', 400));
+    }
+
+    const startOfDay = new Date(appointmentDate);
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date(appointmentDate);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const appointmentsCount = await Appointment.countDocuments({
+      doctor,
+      date: { $gte: startOfDay, $lte: endOfDay },
+      status: { $ne: 'cancelado' }
+    });
+
+    if (appointmentsCount >= 3) {
+      return next(new HttpError('El doctor ya tiene el máximo de turnos asignados para ese día', 400));
     }
 
     const newAppointment = new Appointment({
@@ -105,10 +123,17 @@ const updateAppointmentStatus = async (req, res, next) => {
       req.params.id,
       { status },
       { new: true }
-    );
+    ).populate('patient').populate('doctor');
 
     if (!updatedAppointment) {
       return next(new HttpError('Turno no encontrado', 404));
+    }
+    if (status === APPOINTMENT_STATUS.CONFIRMED) {
+      await sendEmail({
+        email: updatedAppointment.patient.email,
+        subject: 'Confirmacion de turno',
+        html: appointmentReminderEmail(updatedAppointment.patient.firstName, updatedAppointment.date, updatedAppointment.doctor.firstName)
+      });
     }
 
     res.json(updatedAppointment);

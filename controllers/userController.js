@@ -4,6 +4,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const sendEmail = require('../utils/sendEmail');
 const { paginatedResponse } = require('../utils/paginate');
+const { recoverPasswordEmail } = require('../utils/emails/recoverPasswordEmail');
 
 
 const registerUser = async (req, res, next) => {
@@ -112,8 +113,8 @@ const recoverPassword = async (req, res, next) => {
 
     await sendEmail({
       email: user.email,
-      name: user.name,
-      link: link
+      subject: 'Recuperación de contraseña',
+      html: recoverPasswordEmail(user.name, link)
     });
 
     res.json({ message: 'Enlace de recuperación enviado' });
