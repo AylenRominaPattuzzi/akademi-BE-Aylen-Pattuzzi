@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+const {User} = require('../models/User');
 const HttpError = require('../utils/http-error');
 
 
@@ -10,17 +10,17 @@ const protect = async (req, res, next) => {
   }
 
   try {
+    
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findById(decoded.id);
-
-    if (!user || !user.active) {
-      return next(new HttpError('Token inválido o usuario inactivo', 401));
+    if (!user) {
+      return next(new HttpError('Token inválido', 401));
     }
 
     req.user = user;
     next();
   } catch (error) {
-    next(new HttpError('Token inválido o expirado', 401));
+    next(new HttpError(error, 401));
   }
 };
 

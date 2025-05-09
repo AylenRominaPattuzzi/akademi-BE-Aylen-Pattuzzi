@@ -2,13 +2,15 @@ const express = require('express');
 const { check } = require('express-validator');
 const appointmentController = require('../controllers/appointmentController');
 const { protect, restrictTo } = require('../middleware/auth');
+const { USER_ROLES } = require('../models/User');
+const { APPOINTMENT_STATUS } = require('../models/Appointment');
 
 const router = express.Router();
 
 router.post(
   '/',
   protect,
-  restrictTo('admin', 'recepcion'),
+  restrictTo(USER_ROLES.ADMIN, USER_ROLES.RECEPCION),
   [
     check('patient').notEmpty().withMessage('El paciente es obligatorio'),
     check('doctor').notEmpty().withMessage('El doctor es obligatorio'),
@@ -17,16 +19,29 @@ router.post(
   appointmentController.createAppointment
 );
 
-router.get('/', protect, restrictTo('admin', 'recepcion'), appointmentController.listAppointments);
-router.get('/:id', protect, restrictTo('admin', 'recepcion'), appointmentController.getAppointmentById);
+router.get(
+  '/',
+  protect,
+  restrictTo(USER_ROLES.ADMIN, USER_ROLES.RECEPCION),
+  appointmentController.listAppointments
+);
+
+router.get(
+  '/:id',
+  protect,
+  restrictTo(USER_ROLES.ADMIN, USER_ROLES.RECEPCION),
+  appointmentController.getAppointmentById
+);
 
 router.put(
   '/:id/status',
   protect,
-  restrictTo('admin', 'recepcion'),
+  restrictTo(USER_ROLES.ADMIN, USER_ROLES.RECEPCION),
   [
-    check('status').notEmpty().withMessage('El estado es obligatorio')
-      .isIn(['confirmado', 'cancelado']).withMessage('El estado debe ser "confirmado" o "cancelado"')
+    check('status')
+      .notEmpty().withMessage('El estado es obligatorio')
+      .isIn(Object.values(APPOINTMENT_STATUS).filter(status => status !== APPOINTMENT_STATUS.PENDING))
+      .withMessage(`El estado debe ser uno de: ${Object.values(APPOINTMENT_STATUS).filter(status => status !== APPOINTMENT_STATUS.PENDING).join(', ')}`)
   ],
   appointmentController.updateAppointmentStatus
 );

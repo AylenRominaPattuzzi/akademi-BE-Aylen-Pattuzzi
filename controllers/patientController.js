@@ -1,6 +1,7 @@
 const { validationResult } = require('express-validator');
 const Patient = require('../models/Patient');
 const HttpError = require('../utils/http-error');
+const { paginatedResponse } = require('../utils/paginate');
 
 const createPatient = async (req, res, next) => {
   const errors = validationResult(req);
@@ -28,8 +29,8 @@ const createPatient = async (req, res, next) => {
 const listPatients = async (req, res, next) => {
   try {
     const filter = {};
-    if (req.query.name) {
-      filter.firstName = new RegExp(req.query.name, 'i');
+    if (req.query.firstName) {
+      filter.firstName = req.query.firstName;
     }
     if (req.query.dni) {
       filter.dni = req.query.dni;
@@ -38,14 +39,7 @@ const listPatients = async (req, res, next) => {
       filter.medicalCoverage = req.query.medicalCoverage;
     }
 
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const skip = (page - 1) * limit;
-
-    const total = await Patient.countDocuments(filter);
-    const patients = await Patient.find(filter).skip(skip).limit(limit);
-
-    res.json({ total, page, limit, patients });
+    paginatedResponse(req, res, Patient, filter)
   } catch (error) {
     next(new HttpError(error.message, 500));
   }

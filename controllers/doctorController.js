@@ -1,13 +1,19 @@
 const Doctor = require('../models/Doctor');
-const Appointment = require('../models/Appointment'); // Suponiendo que existe un modelo de Turnos
+const {Appointment} = require('../models/Appointment');
 const HttpError = require('../utils/http-error');
+const { paginatedResponse } = require('../utils/paginate');
 
 
 const createDoctor = async (req, res, next) => {
   try {
-    const existingDoctor = await Doctor.findOne({ email: req.body.email });
+    const existingDoctor = await Doctor.findOne({
+      $or: [
+        { email: req.body.email },
+        { dni: req.body.dni }
+      ]
+    });
     if (existingDoctor) {
-      return next(new HttpError('El correo electrónico ya está registrado', 400));
+      return next(new HttpError('El doctor ya está registrado', 400));
     }
     const newDoctor = new Doctor(req.body);
     const savedDoctor = await newDoctor.save();
@@ -20,19 +26,13 @@ const createDoctor = async (req, res, next) => {
 
 const listDoctors = async (req, res, next) => {
   try {
-    const filter = {};
+    const filter = { active: true }; 
 
-    if (!req.query.specialty) {
-      return next(new HttpError('La especialidad es obligatoria', 400));
+    if (req.query.specialty) {
+      filter.specialty = new RegExp(req.query.specialty, 'i');
     }
-    filter.specialty = req.query.specialty;
 
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const skip = (page - 1) * limit;
-
-    const doctors = await Doctor.find(filter).skip(skip).limit(limit);
-    res.json(doctors);
+    paginatedResponse(req, res, Doctor, filter)
   } catch (error) {
     next(new HttpError(error.message, 500));
   }

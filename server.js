@@ -37,7 +37,7 @@ app.use((req, res, next) => {
 
 app.use((error, req, res, next) => {
   if (res.headersSent) {
-    return next(error);
+    return next(HttpError(error, error?.code || 500));
   }
   res.status(error.code || 500).json({ error: error.message || 'Ocurrió un error desconocido' });
 });

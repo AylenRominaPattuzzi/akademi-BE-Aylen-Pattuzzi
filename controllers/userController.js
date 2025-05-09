@@ -1,8 +1,9 @@
-const User = require('../models/User');
+const {User} = require('../models/User');
 const HttpError = require('../utils/http-error');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const sendEmail = require('../middleware/sendEmail');
+const sendEmail = require('../utils/sendEmail');
+const { paginatedResponse } = require('../utils/paginate');
 
 
 const registerUser = async (req, res, next) => {
@@ -28,12 +29,7 @@ const listUsers = async (req, res, next) => {
       filter.role = req.query.role;
     }
 
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const skip = (page - 1) * limit;
-
-    const users = await User.find(filter).select('-password').skip(skip).limit(limit);
-    res.json(users);
+    paginatedResponse(req, res, User, filter)
   } catch (error) {
     next(new HttpError(error.message, 500));
   }
@@ -56,10 +52,6 @@ const getUserById = async (req, res, next) => {
 const updateUser = async (req, res, next) => {
   try {
     const updates = req.body;
-
-    if (updates.password) {
-      updates.password = await bcrypt.hash(updates.password, 12);
-    }
 
     const updatedUser = await User.findByIdAndUpdate(req.params.id, updates, { new: true }).select('-password');
     if (!updatedUser) {
@@ -90,7 +82,7 @@ const loginUser = async (req, res, next) => {
   const { email, password } = req.body;
 
   try {
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).select('+password');;
     if (!user) {
       return next(new HttpError('Usuario no encontrado', 401));
     }
@@ -115,8 +107,8 @@ const recoverPassword = async (req, res, next) => {
       return next(new HttpError('Usuario no encontrado', 404));
     }
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '15m' });
-    const link = `${process.env.FRONTEND_URL}/reset/${token}`;
+    const token = jwt.sign({ id: user._id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '7h' });
+    const link = `http://localhost:3000/api/user/reset/${token}`;
 
     await sendEmail({
       email: user.email,
@@ -134,13 +126,13 @@ const recoverPassword = async (req, res, next) => {
 const resetPassword = async (req, res, next) => {
   try {
     const decoded = jwt.verify(req.params.token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.id);
+    const user = await User.findById(decoded.id).select('+password');;
 
     if (!user) {
       return next(new HttpError('Usuario no encontrado', 404));
     }
 
-    user.password = await bcrypt.hash(req.body.password, 12);
+    user.password = req.body.password
     await user.save();
 
     res.json({ message: 'Contraseña actualizada correctamente' });

@@ -1,7 +1,10 @@
-const Appointment = require('../models/Appointment');
+const {Appointment} = require('../models/Appointment');
 const Doctor = require('../models/Doctor');
 const Patient = require('../models/Patient');
 const HttpError = require('../utils/http-error');
+const { APPOINTMENT_STATUS } = require('../models/Appointment');
+const { paginatedResponse } = require('../utils/paginate');
+const { default: mongoose } = require('mongoose');
 
 const createAppointment = async (req, res, next) => {
   const { patient, doctor, date, reason } = req.body;
@@ -23,7 +26,7 @@ const createAppointment = async (req, res, next) => {
       return next(new HttpError('El paciente no existe', 400));
     }
 
-    const overlappingAppointment = await Appointment.findOne({ doctor, date: appointmentDate });
+    const overlappingAppointment = await Appointment.findOne({ doctor, date: appointmentDate, status: { $ne: 'cancelado' } });
     if (overlappingAppointment) {
       return next(new HttpError('El doctor no está disponible en esa fecha y hora', 400));
     }
@@ -43,28 +46,32 @@ const createAppointment = async (req, res, next) => {
 };
 
 const listAppointments = async (req, res, next) => {
-  const { patient, doctor, page = 1, limit = 10 } = req.query;
+  const { patient, doctor } = req.query;
 
-  if (!patient || !doctor) {
-    return next(new HttpError('Filtros "patient" y "doctor" son obligatorios', 400));
-  }
+  // if (!patient || !doctor) {
+  //   return next(new HttpError('Filtros "patient" y "doctor" son obligatorios', 400));
+  // }
 
   try {
-    const filter = { patient, doctor };
 
-    const total = await Appointment.countDocuments(filter);
-    const appointments = await Appointment.find(filter)
-      .skip((page - 1) * limit)
-      .limit(Number(limit))
-      .populate('patient')
-      .populate('doctor');
+    if (patient && !mongoose.Types.ObjectId.isValid(patient)) {
+      return next(new HttpError('ID de paciente inválido', 400));
+    }
+    
+    if (doctor && !mongoose.Types.ObjectId.isValid(doctor)) {
+      return next(new HttpError('ID de doctor inválido', 400));
+    }
 
-    res.json({
-      total,
-      page: Number(page),
-      totalPages: Math.ceil(total / limit),
-      data: appointments
-    });
+    const filter = { };
+
+    if (req.query.patient) {
+      filter.patient = patient
+    }
+    if (req.query.doctor) {
+      filter.doctor = doctor
+    }
+
+    paginatedResponse(req, res, Appointment, filter)
   } catch (error) {
     next(new HttpError(error.message, 500));
   }
@@ -90,7 +97,7 @@ const updateAppointmentStatus = async (req, res, next) => {
   const { status } = req.body;
 
   try {
-    if (!['confirmado', 'cancelado'].includes(status)) {
+    if (!Object.values(APPOINTMENT_STATUS).includes(status)) {
       return next(new HttpError('Estado inválido', 400));
     }
 
