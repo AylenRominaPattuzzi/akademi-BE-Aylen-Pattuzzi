@@ -1,14 +1,16 @@
-const {User} = require('../models/User');
+const { User } = require('../models/User');
 const HttpError = require('../utils/http-error');
-const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const sendEmail = require('../utils/sendEmail');
 const { paginatedResponse } = require('../utils/paginate');
 const { recoverPasswordEmail } = require('../utils/emails/recoverPasswordEmail');
+const validateUserInput = require('../utils/validateInputs');
 
 
 const registerUser = async (req, res, next) => {
   try {
+    validateUserInput(req.body);
+
     const existingUser = await User.findOne({ email: req.body.email });
     if (existingUser) {
       return next(new HttpError('El email ya está registrado', 400));
@@ -51,7 +53,9 @@ const getUserById = async (req, res, next) => {
 
 
 const updateUser = async (req, res, next) => {
+
   try {
+    validateUserInput(req.body);
     const updates = req.body;
 
     const updatedUser = await User.findByIdAndUpdate(req.params.id, updates, { new: true }).select('-password');
@@ -81,8 +85,9 @@ const deleteUser = async (req, res, next) => {
 
 const loginUser = async (req, res, next) => {
   const { email, password } = req.body;
-
   try {
+
+    validateUserInput({ email, password });
     const user = await User.findOne({ email }).select('+password');;
     if (!user) {
       return next(new HttpError('Usuario no encontrado', 401));
@@ -125,7 +130,10 @@ const recoverPassword = async (req, res, next) => {
 
 
 const resetPassword = async (req, res, next) => {
+
+  const { email, password } = req.body;
   try {
+    validateUserInput({ email, password });
     const decoded = jwt.verify(req.params.token, process.env.JWT_SECRET);
     const user = await User.findById(decoded.id).select('+password');;
 

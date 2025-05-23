@@ -1,4 +1,4 @@
-const {Appointment} = require('../models/Appointment');
+const { Appointment } = require('../models/Appointment');
 const Doctor = require('../models/Doctor');
 const Patient = require('../models/Patient');
 const HttpError = require('../utils/http-error');
@@ -9,9 +9,9 @@ const sendEmail = require('../utils/sendEmail');
 const { appointmentReminderEmail } = require('../utils/emails/appointmentReminderEmail');
 
 const createAppointment = async (req, res, next) => {
-  const { patient, doctor, date, reason } = req.body;
 
   try {
+    validateDoctorInput(req.body)
     const appointmentDate = new Date(date);
 
     if (appointmentDate <= new Date()) {
@@ -66,21 +66,17 @@ const createAppointment = async (req, res, next) => {
 const listAppointments = async (req, res, next) => {
   const { patient, doctor } = req.query;
 
-  // if (!patient || !doctor) {
-  //   return next(new HttpError('Filtros "patient" y "doctor" son obligatorios', 400));
-  // }
-
   try {
 
     if (patient && !mongoose.Types.ObjectId.isValid(patient)) {
       return next(new HttpError('ID de paciente inválido', 400));
     }
-    
+
     if (doctor && !mongoose.Types.ObjectId.isValid(doctor)) {
       return next(new HttpError('ID de doctor inválido', 400));
     }
 
-    const filter = { };
+    const filter = {};
 
     if (req.query.patient) {
       filter.patient = patient
@@ -115,6 +111,7 @@ const updateAppointmentStatus = async (req, res, next) => {
   const { status } = req.body;
 
   try {
+    validateDoctorInput(req.body)
     if (!Object.values(APPOINTMENT_STATUS).includes(status)) {
       return next(new HttpError('Estado inválido', 400));
     }

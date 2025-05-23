@@ -1,15 +1,16 @@
 const Doctor = require('../models/Doctor');
-const {Appointment} = require('../models/Appointment');
+const { Appointment } = require('../models/Appointment');
 const HttpError = require('../utils/http-error');
 const { paginatedResponse } = require('../utils/paginate');
+const validateDoctorInput = require('../utils/validateInputs');
 
 
 const createDoctor = async (req, res, next) => {
   try {
+    validateDoctorInput(req.body)
     const existingDoctor = await Doctor.findOne({
       $or: [
         { email: req.body.email },
-        { dni: req.body.dni }
       ]
     });
     if (existingDoctor) {
@@ -26,7 +27,7 @@ const createDoctor = async (req, res, next) => {
 
 const listDoctors = async (req, res, next) => {
   try {
-    const filter = { active: true }; 
+    const filter = { active: true };
 
     if (req.query.specialty) {
       filter.specialty = new RegExp(req.query.specialty, 'i');
@@ -52,7 +53,7 @@ const getDoctorById = async (req, res, next) => {
 
 const updateDoctor = async (req, res, next) => {
   try {
- 
+    validateDoctorInput(req.body)
     if (req.body.active === false) {
       const doctorHasAppointments = await Appointment.exists({ doctor: req.params.id });
       if (doctorHasAppointments) {

@@ -1,9 +1,15 @@
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
+const cors = require('cors');         
 const HttpError = require('./utils/http-error');
 
 const app = express();
+
+app.use(cors({                           // <--- CONFIGURAR CORS
+  origin: 'http://localhost:3001',
+  credentials: true,
+}));
 
 app.use(express.json());
 
@@ -33,7 +39,6 @@ app.use((req, res, next) => {
   const error = new HttpError('Ruta no encontrada', 404);
   next(error);
 });
-
 
 app.use((error, req, res, next) => {
   if (res.headersSent) {
