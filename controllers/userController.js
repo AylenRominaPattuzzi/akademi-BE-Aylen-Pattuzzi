@@ -8,6 +8,10 @@ const validateUserInput = require('../utils/validateInputs');
 
 
 const registerUser = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return next(new HttpError(errors.array()[0].msg, 422));
+  }
   try {
     validateUserInput(req.body);
 
@@ -32,7 +36,8 @@ const listUsers = async (req, res, next) => {
       filter.role = req.query.role;
     }
 
-    paginatedResponse(req, res, User, filter)
+    const { data, total, page, limit, totalPages } = await paginatedResponse(User, req.query, filter);
+    res.json({ data, total, page, limit, totalPages });
   } catch (error) {
     next(new HttpError(error.message, 500));
   }
@@ -53,7 +58,10 @@ const getUserById = async (req, res, next) => {
 
 
 const updateUser = async (req, res, next) => {
-
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return next(new HttpError(errors.array()[0].msg, 422));
+  }
   try {
     validateUserInput(req.body);
     const updates = req.body;
@@ -114,7 +122,8 @@ const recoverPassword = async (req, res, next) => {
     }
 
     const token = jwt.sign({ id: user._id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '7h' });
-    const link = `http://localhost:3000/api/user/reset/${token}`;
+    const link = `http://localhost:3001/reset-password/${token}`;
+
 
     await sendEmail({
       email: user.email,
@@ -130,18 +139,19 @@ const recoverPassword = async (req, res, next) => {
 
 
 const resetPassword = async (req, res, next) => {
-
-  const { email, password } = req.body;
+  const { password } = req.body; 
   try {
-    validateUserInput({ email, password });
+
+    validateUserInput({ password });
+
     const decoded = jwt.verify(req.params.token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.id).select('+password');;
+    const user = await User.findById(decoded.id).select('+password');
 
     if (!user) {
       return next(new HttpError('Usuario no encontrado', 404));
     }
 
-    user.password = req.body.password
+    user.password = password; 
     await user.save();
 
     res.json({ message: 'Contraseña actualizada correctamente' });
@@ -149,6 +159,7 @@ const resetPassword = async (req, res, next) => {
     next(new HttpError('Token inválido o expirado', 400));
   }
 };
+
 
 exports.registerUser = registerUser;
 exports.listUsers = listUsers;

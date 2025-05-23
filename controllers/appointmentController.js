@@ -9,7 +9,10 @@ const sendEmail = require('../utils/sendEmail');
 const { appointmentReminderEmail } = require('../utils/emails/appointmentReminderEmail');
 
 const createAppointment = async (req, res, next) => {
-
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return next(new HttpError(errors.array()[0].msg, 422));
+  }
   try {
     validateDoctorInput(req.body)
     const appointmentDate = new Date(date);
@@ -85,7 +88,8 @@ const listAppointments = async (req, res, next) => {
       filter.doctor = doctor
     }
 
-    paginatedResponse(req, res, Appointment, filter)
+    const { data, total, page, limit, totalPages } = await paginatedResponse(Appointment, req.query, filter);
+    res.json({ data, total, page, limit, totalPages });
   } catch (error) {
     next(new HttpError(error.message, 500));
   }

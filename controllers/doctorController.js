@@ -6,6 +6,10 @@ const validateDoctorInput = require('../utils/validateInputs');
 
 
 const createDoctor = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return next(new HttpError(errors.array()[0].msg, 422));
+  }
   try {
     validateDoctorInput(req.body)
     const existingDoctor = await Doctor.findOne({
@@ -33,7 +37,8 @@ const listDoctors = async (req, res, next) => {
       filter.specialty = new RegExp(req.query.specialty, 'i');
     }
 
-    paginatedResponse(req, res, Doctor, filter)
+    const { data, total, page, limit, totalPages } = await paginatedResponse(Doctor, req.query, filter);
+    res.json({ data, total, page, limit, totalPages });
   } catch (error) {
     next(new HttpError(error.message, 500));
   }
@@ -52,6 +57,10 @@ const getDoctorById = async (req, res, next) => {
 };
 
 const updateDoctor = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return next(new HttpError(errors.array()[0].msg, 422));
+  }
   try {
     validateDoctorInput(req.body)
     if (req.body.active === false) {
